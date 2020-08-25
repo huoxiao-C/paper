@@ -134,9 +134,25 @@ ct_end_time_date = datetime.datetime.strptime(end_time_str, '%Y%m%d%H%M%S')
 days = (end_time-begin_time).days
 lons      = np.zeros((91, 144))
 lats      = np.zeros((91, 144))
-xco2_ori      = np.zeros((91, 144), dtype=float)
-xco2_ass      = np.zeros((91, 144), dtype=float)
-xco2_diff      = np.zeros((91, 144), dtype=float)
+xco2_ori0      = np.zeros((91, 144), dtype=float)
+xco2_ass0      = np.zeros((91, 144), dtype=float)
+xco2_diff0      = np.zeros((91, 144), dtype=float)
+
+xco2_ori3      = np.zeros((91, 144), dtype=float)
+xco2_ass3      = np.zeros((91, 144), dtype=float)
+xco2_diff3      = np.zeros((91, 144), dtype=float)
+
+xco2_ori4      = np.zeros((91, 144), dtype=float)
+xco2_ass4      = np.zeros((91, 144), dtype=float)
+xco2_diff4      = np.zeros((91, 144), dtype=float)
+
+xco2_ori6      = np.zeros((91, 144), dtype=float)
+xco2_ass6      = np.zeros((91, 144), dtype=float)
+xco2_diff6      = np.zeros((91, 144), dtype=float)
+
+xco2_ori12      = np.zeros((91, 144), dtype=float)
+xco2_ass12      = np.zeros((91, 144), dtype=float)
+xco2_diff12      = np.zeros((91, 144), dtype=float)
 #gc
 Mdry = 29.0
 level = 47
@@ -148,9 +164,20 @@ xco2_ass_day_mean_list = []
 xco2_diff_day_mean_list = []
 #calendar.monthrange(2016, month)[1]+1
 
-year_xco2_pri = np.zeros((days, 91, 144))
-year_xco2_ass = np.zeros((days, 91, 144))
+year_xco2_pri0 = np.zeros((days, 91, 144))
+year_xco2_ass0 = np.zeros((days, 91, 144))
 
+year_xco2_pri3 = np.zeros((days, 91, 144))
+year_xco2_ass3 = np.zeros((days, 91, 144))
+
+year_xco2_pri4 = np.zeros((days, 91, 144))
+year_xco2_ass4 = np.zeros((days, 91, 144))
+
+year_xco2_pri6 = np.zeros((days, 91, 144))
+year_xco2_ass6 = np.zeros((days, 91, 144))
+
+year_xco2_pri12 = np.zeros((days, 91, 144))
+year_xco2_ass12 = np.zeros((days, 91, 144))
 for day in range(days):
     for hour in range(24):
         print(datetime.datetime.strftime(begin_time, '%Y-%m-%d %H:%M:%S'))
@@ -177,22 +204,69 @@ for day in range(days):
         q = gcmet.variables['Met_SPHU'][0, :, :, :] * 1e-3
         h = pressure_weigt_function(gc_pre, q, Mdry, g, level, surface_pre)
 
-        xco2_ass += np.sum(h[:, :, :]*(gcspc.variables['SpeciesConc_CO2'][0, :, :, :]), axis=0)
+        xco2_ass0 += np.sum(h[:, :, :]*(gcspc.variables['SpeciesConc_CO2'][0, :, :, :]), axis=0)
 
-        xco2_ori += np.sum(h[:, :, :]*(gcspc_bac.variables['SpeciesConc_CO2'][0, :, :, :]), axis=0)
-        xco2_diff += np.sum(h[:, :, :]*(gcspc.variables['SpeciesConc_CO2'][0, :, :, :]), axis=0)-np.sum(h[:, :, :]*(gcspc_bac.variables['SpeciesConc_CO2'][0, :, :, :]), axis=0)
+        xco2_ori0 += np.sum(h[:, :, :]*(gcspc_bac.variables['SpeciesConc_CO2'][0, :, :, :]), axis=0)
+        xco2_diff0 += np.sum(h[:, :, :]*(gcspc.variables['SpeciesConc_CO2'][0, :, :, :]), axis=0)-np.sum(h[:, :, :]*(gcspc_bac.variables['SpeciesConc_CO2'][0, :, :, :]), axis=0)
+
+        if hour%4==0:
+            xco2_ass4 += np.sum(h[:, :, :] * (gcspc.variables['SpeciesConc_CO2'][0, :, :, :]), axis=0)
+
+            xco2_ori4 += np.sum(h[:, :, :] * (gcspc_bac.variables['SpeciesConc_CO2'][0, :, :, :]), axis=0)
+            xco2_diff4 += np.sum(h[:, :, :] * (gcspc.variables['SpeciesConc_CO2'][0, :, :, :]), axis=0) - np.sum(
+                h[:, :, :] * (gcspc_bac.variables['SpeciesConc_CO2'][0, :, :, :]), axis=0)
+        elif hour%3==0:
+            xco2_ass3 += np.sum(h[:, :, :] * (gcspc.variables['SpeciesConc_CO2'][0, :, :, :]), axis=0)
+
+            xco2_ori3 += np.sum(h[:, :, :] * (gcspc_bac.variables['SpeciesConc_CO2'][0, :, :, :]), axis=0)
+            xco2_diff3 += np.sum(h[:, :, :] * (gcspc.variables['SpeciesConc_CO2'][0, :, :, :]), axis=0) - np.sum(
+                h[:, :, :] * (gcspc_bac.variables['SpeciesConc_CO2'][0, :, :, :]), axis=0)
+        elif hour%6==0:
+            xco2_ass6 += np.sum(h[:, :, :] * (gcspc.variables['SpeciesConc_CO2'][0, :, :, :]), axis=0)
+
+            xco2_ori6 += np.sum(h[:, :, :] * (gcspc_bac.variables['SpeciesConc_CO2'][0, :, :, :]), axis=0)
+            xco2_diff6 += np.sum(h[:, :, :] * (gcspc.variables['SpeciesConc_CO2'][0, :, :, :]), axis=0) - np.sum(
+                h[:, :, :] * (gcspc_bac.variables['SpeciesConc_CO2'][0, :, :, :]), axis=0)
+        elif hour%12==0:
+            xco2_ass12 += np.sum(h[:, :, :] * (gcspc.variables['SpeciesConc_CO2'][0, :, :, :]), axis=0)
+
+            xco2_ori12 += np.sum(h[:, :, :] * (gcspc_bac.variables['SpeciesConc_CO2'][0, :, :, :]), axis=0)
+            xco2_diff12 += np.sum(h[:, :, :] * (gcspc.variables['SpeciesConc_CO2'][0, :, :, :]), axis=0) - np.sum(
+                h[:, :, :] * (gcspc_bac.variables['SpeciesConc_CO2'][0, :, :, :]), axis=0)
 
         tot_num += 1
         begin_time += datetime.timedelta(hours=1)
 
-    year_xco2_pri[day] = xco2_ori/24
-    year_xco2_ass[day] = xco2_ass/24
-    print('ori mean', np.mean(year_xco2_pri[day]))
-    print('ass mean', np.mean(year_xco2_ass[day]))
+    year_xco2_pri0[day] = xco2_ori0/24
+    year_xco2_ass0[day] = xco2_ass0/24
+    year_xco2_pri4[day] = xco2_ori4/6
+    year_xco2_ass4[day] = xco2_ass4/6
+    year_xco2_pri3[day] = xco2_ori3/8
+    year_xco2_ass3[day] = xco2_ass3/8
+    year_xco2_pri6[day] = xco2_ori6/4
+    year_xco2_ass6[day] = xco2_ass6/4
+    year_xco2_pri12[day] = xco2_ori12/2
+    year_xco2_ass12[day] = xco2_ass12/2
     #reset
-    xco2_ass = 0
-    xco2_diff = 0
-    xco2_ori = 0
+    xco2_ass0 = 0
+    xco2_diff0 = 0
+    xco2_ori0 = 0
+
+    xco2_ass4 = 0
+    xco2_diff4 = 0
+    xco2_ori4 = 0
+
+    xco2_ass3 = 0
+    xco2_diff3 = 0
+    xco2_ori3 = 0
+
+    xco2_ass6 = 0
+    xco2_diff6 = 0
+    xco2_ori6 = 0
+
+    xco2_ass12 = 0
+    xco2_diff12 = 0
+    xco2_ori12 = 0
     #plot
     # xco2 = gc.variables['SpeciesRst_CO2'][0, 0, :, :]
 
@@ -235,7 +309,7 @@ for ct_day in range(days):
     ct_xco2 = 0.0
 
 #output
-out_file_path = '/home/huoxiao/paper_data/GEOSChem.XCO2.nc4'
+out_file_path = '/home/huoxiao/paper_data/GEOSChem.XCO2_diff_hour.nc4'
 print('output file: ', out_file_path)
 out_oco2 = Dataset(out_file_path, 'w')
 Dataset.createDimension(out_oco2, dimname='time', size=None)
@@ -246,7 +320,7 @@ Dataset.createDimension(out_oco2, dimname='DateStrLen', size=23)
 
 Times_out = Dataset.createVariable(out_oco2, 'Times', datatype=np.float64, dimensions=('time'))
 Times_out.units = "days since 2018-01-01"
-Times_out[:] = np.arange(days)
+Times_out[0] = np.arange(day)
 
 lat_out = Dataset.createVariable(out_oco2, 'lat', datatype=np.float32, dimensions=('lat'))
 lat_out[:] = gc_lats
@@ -255,17 +329,57 @@ lon_out = Dataset.createVariable(out_oco2, 'lon', datatype=np.float32, dimension
 lon_out[:] = gc_lons
 
 #oco2
-pri_xco2_out = Dataset.createVariable(out_oco2, 'prior_xco2', \
+pri_xco2_out = Dataset.createVariable(out_oco2, 'prior_xco20', \
                                        datatype=np.float32, dimensions=('time', 'lat', 'lon'))
-pri_xco2_out[...] = year_xco2_pri
+pri_xco2_out[...] = year_xco2_pri0
 
 
 
-pos_xco2_out = Dataset.createVariable(out_oco2, 'posterior_xco2_', \
+pos_xco2_out = Dataset.createVariable(out_oco2, 'posterior_xco20', \
                                       datatype=np.float32,dimensions=('time', 'lat', 'lon'))
-pos_xco2_out[...] = year_xco2_ass
+pos_xco2_out[...] = year_xco2_ass0
+
+#4
+pri_xco2_out = Dataset.createVariable(out_oco2, 'prior_xco24', \
+                                       datatype=np.float32, dimensions=('time', 'lat', 'lon'))
+pri_xco2_out[...] = year_xco2_pri4
+
+pos_xco2_out = Dataset.createVariable(out_oco2, 'posterior_xco24', \
+                                      datatype=np.float32,dimensions=('time', 'lat', 'lon'))
+pos_xco2_out[...] = year_xco2_ass4
+
+#3
+pri_xco2_out = Dataset.createVariable(out_oco2, 'prior_xco23', \
+                                       datatype=np.float32, dimensions=('time', 'lat', 'lon'))
+pri_xco2_out[...] = year_xco2_pri3
+
+
+
+pos_xco2_out = Dataset.createVariable(out_oco2, 'posterior_xco23', \
+                                      datatype=np.float32,dimensions=('time', 'lat', 'lon'))
+pos_xco2_out[...] = year_xco2_ass3
+#6
+pri_xco2_out = Dataset.createVariable(out_oco2, 'prior_xco26', \
+                                       datatype=np.float32, dimensions=('time', 'lat', 'lon'))
+pri_xco2_out[...] = year_xco2_pri6
+
+
+
+pos_xco2_out = Dataset.createVariable(out_oco2, 'posterior_xco26', \
+                                      datatype=np.float32,dimensions=('time', 'lat', 'lon'))
+pos_xco2_out[...] = year_xco2_ass6
+
+#12
+pri_xco2_out = Dataset.createVariable(out_oco2, 'prior_xco212', \
+                                       datatype=np.float32, dimensions=('time', 'lat', 'lon'))
+pri_xco2_out[...] = year_xco2_pri12
+
+
+
+pos_xco2_out = Dataset.createVariable(out_oco2, 'posterior_xco212', \
+                                      datatype=np.float32,dimensions=('time', 'lat', 'lon'))
+pos_xco2_out[...] = year_xco2_ass12
 
 ct_xco2_out = Dataset.createVariable(out_oco2, 'ct_xco2', \
                                       datatype=np.float32,dimensions=('time', 'lat', 'lon'))
 ct_xco2_out[...] = year_ct_xco2
-
