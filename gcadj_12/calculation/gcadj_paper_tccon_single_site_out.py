@@ -371,8 +371,13 @@ for oco2_obsith in range(oco2_obs_flag_array.shape[0]):
 
             # search lon lat index
 
-
-
+            # set lat and lon span
+            if tccon_nc_data.variables['lat_deg'][0] > -25:
+                lat_span = 2.5
+                lon_span = 5
+            else:
+                lat_span = 5
+                lon_span = 60
             # calendar.monthrange(2016, month)[1]+1
             #read gc file
             gcrspc_pri_filename = 'GEOSChem.SpeciesConc.{:0>4d}{:0>2d}{:0>2d}_{:0>2d}00z.nc4' \
@@ -390,11 +395,11 @@ for oco2_obsith in range(oco2_obs_flag_array.shape[0]):
             gcspc_pos_nc_data = Dataset(gcrspc_pos_path, 'r')
 
             #search lon lat index
-            gc_lon_lt_tccon_lon = gcmet_nc_data.variables['lon'][np.where(gcmet_nc_data.variables['lon'][:] <= (tccon_dic['lon'] + 5))]
-            gc_lon_ht_tccon_lon = gc_lon_lt_tccon_lon[gc_lon_lt_tccon_lon >= (tccon_dic['lon'] - 5)]
+            gc_lon_lt_tccon_lon = gcmet_nc_data.variables['lon'][np.where(gcmet_nc_data.variables['lon'][:] <= (tccon_dic['lon'] + lon_span))]
+            gc_lon_ht_tccon_lon = gc_lon_lt_tccon_lon[gc_lon_lt_tccon_lon >= (tccon_dic['lon'] - lon_span)]
 
-            gc_lat_lt_tccon_lat = gcmet_nc_data.variables['lat'][np.where(gcmet_nc_data.variables['lat'][:] <= (tccon_dic['lat'] + 2.5))]
-            gc_lat_ht_tccon_lat = gc_lat_lt_tccon_lat[gc_lat_lt_tccon_lat >= (tccon_dic['lat'] - 2.5)]
+            gc_lat_lt_tccon_lat = gcmet_nc_data.variables['lat'][np.where(gcmet_nc_data.variables['lat'][:] <= (tccon_dic['lat'] + lat_span))]
+            gc_lat_ht_tccon_lat = gc_lat_lt_tccon_lat[gc_lat_lt_tccon_lat >= (tccon_dic['lat'] - lat_span)]
 
 
             gc_pos_co2 = gcspc_pos_nc_data.variables['SpeciesConc_CO2'][0, :, :, :]

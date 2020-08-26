@@ -215,19 +215,19 @@ for day in range(days):
             xco2_ori4 += np.sum(h[:, :, :] * (gcspc_bac.variables['SpeciesConc_CO2'][0, :, :, :]), axis=0)
             xco2_diff4 += np.sum(h[:, :, :] * (gcspc.variables['SpeciesConc_CO2'][0, :, :, :]), axis=0) - np.sum(
                 h[:, :, :] * (gcspc_bac.variables['SpeciesConc_CO2'][0, :, :, :]), axis=0)
-        elif hour%3==0:
+        if hour%3==0:
             xco2_ass3 += np.sum(h[:, :, :] * (gcspc.variables['SpeciesConc_CO2'][0, :, :, :]), axis=0)
 
             xco2_ori3 += np.sum(h[:, :, :] * (gcspc_bac.variables['SpeciesConc_CO2'][0, :, :, :]), axis=0)
             xco2_diff3 += np.sum(h[:, :, :] * (gcspc.variables['SpeciesConc_CO2'][0, :, :, :]), axis=0) - np.sum(
                 h[:, :, :] * (gcspc_bac.variables['SpeciesConc_CO2'][0, :, :, :]), axis=0)
-        elif hour%6==0:
+        if hour%6==0:
             xco2_ass6 += np.sum(h[:, :, :] * (gcspc.variables['SpeciesConc_CO2'][0, :, :, :]), axis=0)
 
             xco2_ori6 += np.sum(h[:, :, :] * (gcspc_bac.variables['SpeciesConc_CO2'][0, :, :, :]), axis=0)
             xco2_diff6 += np.sum(h[:, :, :] * (gcspc.variables['SpeciesConc_CO2'][0, :, :, :]), axis=0) - np.sum(
                 h[:, :, :] * (gcspc_bac.variables['SpeciesConc_CO2'][0, :, :, :]), axis=0)
-        elif hour%12==0:
+        if hour%12==0:
             xco2_ass12 += np.sum(h[:, :, :] * (gcspc.variables['SpeciesConc_CO2'][0, :, :, :]), axis=0)
 
             xco2_ori12 += np.sum(h[:, :, :] * (gcspc_bac.variables['SpeciesConc_CO2'][0, :, :, :]), axis=0)
@@ -320,7 +320,7 @@ Dataset.createDimension(out_oco2, dimname='DateStrLen', size=23)
 
 Times_out = Dataset.createVariable(out_oco2, 'Times', datatype=np.float64, dimensions=('time'))
 Times_out.units = "days since 2018-01-01"
-Times_out[0] = np.arange(day)
+Times_out[...] = np.arange(day)
 
 lat_out = Dataset.createVariable(out_oco2, 'lat', datatype=np.float32, dimensions=('lat'))
 lat_out[:] = gc_lats

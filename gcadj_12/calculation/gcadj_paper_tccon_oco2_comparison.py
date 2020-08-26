@@ -348,7 +348,7 @@ for tccon_i in range(len(tccon_filenames)):
         #set lat and lon span
         if tccon_nc_data.variables['lat_deg'][0]>-25:
             lat_span = 2.5
-            lon_span = 10
+            lon_span = 5
         else:
             lat_span = 5
             lon_span = 60
@@ -494,8 +494,8 @@ for i in range(len(site_list)):
     tccon_out_dic.update({site_name + 'time': all_time_array[i, 0:obs_num]})
     tccon_out_dic.update({site_name+'oco2': all_oco2_xco2_array[i, 0:obs_num]})
     tccon_out_dic.update({site_name + 'tccon': all_tccon_xco2_array[i, 0:obs_num]})
-    tccon_out_dic.update({site_name + 'prior': prior_xco2_array[i, 0:obs_num]})
-    tccon_out_dic.update({site_name + 'posterior': posterior_xco2_array[i, 0:obs_num]})
+    tccon_out_dic.update({site_name + 'prior': all_prior_xco2_array[i, 0:obs_num]})
+    tccon_out_dic.update({site_name + 'posterior': all_posterior_xco2_array[i, 0:obs_num]})
     pddata = pd.concat([pddata, pd.DataFrame(tccon_out_dic)], axis=1)
 
     tccon_out_dic = {}
