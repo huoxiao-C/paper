@@ -112,6 +112,7 @@ while(gc_read_time_date != end_time_date):
 
 
 obspack_file_dir = '/share/nas1_share1/huoxiao_share/CO2_data/Observation_data/obspack_co2_1_CARBONTRACKER_CT2019_2020-01-16/data/nc'
+pbl_file_dir = '/home/huoxiao/GEOS_FP/GEOS_FP_ADJOINT/data/GEOS_2x2.5/MERRA2'
 
 os.chdir(obspack_file_dir)
 obspack_file_name_list = os.listdir()
@@ -127,7 +128,7 @@ longitude_list = []
 obspack_dic_list = []
 for obspackith in range(len(obspack_file_name_list)):
 
-    print(obspack_file_name_list[obspackith])
+
     obspack_nc_data = Dataset(obspack_file_name_list[obspackith])
 
     if(obspack_nc_data.provider_1_affiliation == 'National Oceanic and Atmospheric Administration'):
@@ -136,6 +137,7 @@ for obspackith in range(len(obspack_file_name_list)):
 
 
             if obspack_nc_data.variables['time'][-1] >= end_time_num_sin1970s and obspack_nc_data.variables['time'][0] <= begin_time_num_sin1970s:
+
                 obspack_pressure_list = []
                 obspack_co2_list = []
                 gc_ori_co2_list = []
@@ -145,26 +147,27 @@ for obspackith in range(len(obspack_file_name_list)):
                 obspack_latitude_list = []
                 lat_index_list = []
                 lon_index_list = []
-
+                blh_list = []
 
                 for dataith in range(obspack_nc_data.variables['time'][:].shape[0]):
                     obspack_time_value = obspack_nc_data.variables['time'][dataith]
 
                     if (obspack_nc_data.variables['time'][dataith] <= end_time_num_sin1970s and
                             obspack_nc_data.variables['time'][dataith] >= begin_time_num_sin1970s and
-                            obspack_nc_data.variables['obs_flag'] == 1):
+                            obspack_nc_data.variables['obs_flag'][dataith] == 1):
 
                         latitude = obspack_nc_data.variables['latitude'][dataith]
                         longitude = obspack_nc_data.variables['longitude'][dataith]
                         obspack_time_value = obspack_nc_data.variables['time'][dataith]
                         obspack_pres_value = obspack_nc_data.variables['pressure'][dataith]
 
+
                         gc_file_num_lt_obst_plus_30m = gc_file_nums[np.where(gc_file_nums <= (obspack_time_value + 30 * 60))]
                         gc_file_num = gc_file_num_lt_obst_plus_30m[np.where(gc_file_num_lt_obst_plus_30m >= (obspack_time_value - 30 * 60))]
                         gc_mean_ori_co2_value = np.zeros((gc_level, lat_num, lon_num))
                         gc_mean_na_plus_glint_co2_value = np.zeros((gc_level, lat_num, lon_num))
                         gc_mean_pres_value = np.zeros((gc_level, lat_num, lon_num))
-
+                        pbl_mean_value =  np.zeros((lat_num, lon_num))
                         for gcith in range(gc_file_num.shape[0]):
                             gc_file_date = num2date(gc_file_num[gcith], obspack_units)
                             gc_ori_dir = '/share/nas1_share1/huoxiao_share/GEOSChem_Simulation_test/GEOSChem.SpeciesConc.{:0>4d}{:0>2d}{:0>2d}_{:0>2d}{:0>2d}z.nc4' \
@@ -176,17 +179,25 @@ for obspackith in range(len(obspack_file_name_list)):
                             gc_met_dir = '/share/nas1_share1/huoxiao_share/GEOSChem_Simulation_test/GEOSChem.StateMet.{:0>4d}{:0>2d}{:0>2d}_{:0>2d}{:0>2d}z.nc4' \
                                 .format(gc_file_date.year, gc_file_date.month, gc_file_date.day, gc_file_date.hour,
                                         gc_file_date.minute)
+                            pbl_dir = pbl_file_dir+'/{:0>4d}/{:0>2d}/MERRA2.{:0>4d}{:0>2d}{:0>2d}.A1.2x25.nc4' \
+                                .format(gc_file_date.year, gc_file_date.month,
+                                        gc_file_date.year, gc_file_date.month, gc_file_date.day)
 
                             gc_ori_nc_data = Dataset(gc_ori_dir, 'r')
 
                             gc_na_plus_glint_nc_data = Dataset(gc_na_plus_glint_dir, 'r')
                             gc_met_nc_data = Dataset(gc_met_dir, 'r')
 
+                            pbl_nc_data = Dataset(pbl_dir, 'r')
+
                             gc_mean_ori_co2_value += gc_ori_nc_data.variables['SpeciesConc_CO2'][0, :, :, :] / gc_file_num.shape[0]
                             gc_mean_na_plus_glint_co2_value += gc_na_plus_glint_nc_data.variables['SpeciesConc_CO2'][0,:, :, :]/gc_file_num.shape[0]
                             gc_mean_pres_value += gc_met_nc_data.variables['Met_PMID'][0, :, :, :] / gc_file_num.shape[0]
+                            pbl_mean_value += pbl_nc_data.variables['PBLH'][gc_file_date.hour, :, :]/ gc_file_num.shape[0]
 
-
+                            gc_ori_nc_data.close()
+                            gc_met_nc_data.close()
+                            pbl_nc_data.close()
                         # obspack_time_lt_end_time = obspack_nc_data.variables['time'][np.where(obspack_nc_data.variables['time'][:]<end_time_num_sin1970s)]
                         # obspack_time_ht_begin_time = obspack_time_lt_end_time[np.where(obspack_time_lt_end_time>begin_time_num_sin1970s)]
                         # print(num2date(obspack_nc_data.variables['time'][-1], obspack_units))
@@ -210,9 +221,11 @@ for obspackith in range(len(obspack_file_name_list)):
 
                         #append
                         obspack_pressure_list.append(obspack_pres_value)
+                        blh_list.append(pbl_mean_value[lat_index, lon_index])
                         obspack_co2_list.append(obspack_nc_data.variables['value'][dataith])
                         gc_ori_co2_list.append(gc_ori_inter_co2_value)
                         gc_na_plus_glint_co2_list.append(gc_na_plus_glint_inter_co2_value)
+
 
                         obspack_longitude_list.append(longitude)
                         obspack_latitude_list.append(latitude)
@@ -236,13 +249,14 @@ for obspackith in range(len(obspack_file_name_list)):
                 obspack_dic.update({'gc_ori_co2': np.array(gc_ori_co2_list)})
                 obspack_dic.update({'gc_na_plus_glint_co2': np.array(gc_na_plus_glint_co2_list)})
 
+                obspack_dic.update({'obspack_blh': np.array(blh_list)})
                 obspack_dic_list.append(obspack_dic)
 
 aircraft_out_dic = {}
 pddata = pd.DataFrame(aircraft_out_dic)
 for dicith in range(len(obspack_dic_list)):
     pddata = pd.concat([pddata, pd.DataFrame(obspack_dic_list[dicith])], axis=1)
-with pd.ExcelWriter('/home/huoxiao/paper_data/gc_aircraft_obs_flag''.xlsx', \
+with pd.ExcelWriter('/home/huoxiao/paper_data/gc_aircraft_obs_flag_gc''.xlsx', \
                         mode='w') as writer:
     pddata.to_excel(writer, sheet_name='TCCON SITE DATA', engine='xlsxwriter')
 
